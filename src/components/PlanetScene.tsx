@@ -45,22 +45,22 @@ function generateNoiseTexture(baseColor: string) {
   canvas.width = 512;
   canvas.height = 512;
   const ctx = canvas.getContext('2d')!;
-  
+
   ctx.fillStyle = baseColor;
   ctx.fillRect(0, 0, 512, 512);
-  
+
   const imageData = ctx.getImageData(0, 0, 512, 512);
   const data = imageData.data;
-  
+
   for (let i = 0; i < data.length; i += 4) {
     const noise = (Math.random() - 0.5) * 30;
     data[i] = Math.min(255, Math.max(0, data[i] + noise));
-    data[i+1] = Math.min(255, Math.max(0, data[i+1] + noise));
-    data[i+2] = Math.min(255, Math.max(0, data[i+2] + noise));
+    data[i + 1] = Math.min(255, Math.max(0, data[i + 1] + noise));
+    data[i + 2] = Math.min(255, Math.max(0, data[i + 2] + noise));
   }
-  
+
   ctx.putImageData(imageData, 0, 0);
-  
+
   const texture = new THREE.CanvasTexture(canvas);
   texture.wrapS = THREE.RepeatWrapping;
   texture.wrapT = THREE.RepeatWrapping;
@@ -91,16 +91,16 @@ export default function PlanetScene({ activeIndex, onPlanetChange }: { activeInd
 
     // Scene setup
     const scene = new THREE.Scene();
-    scene.background = new THREE.Color('#000000');
-    // Deep space fog - linear fog to strictly hide all planets behind the active one
-    scene.fog = new THREE.Fog('#000000', 300, 800);
+    scene.background = null; // transparent — StarField visible behind
+    // Fog exponencial que desvanece planetas lejanos sin cubrir el fondo
+    scene.fog = new THREE.FogExp2('#000000', 0.0022);
     sceneRef.current = scene;
 
     // Camera setup
     const cameraRig = new THREE.Group();
     cameraRigRef.current = cameraRig;
     scene.add(cameraRig);
-    
+
     const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 3000);
     cameraRef.current = camera;
     cameraRig.add(camera);
@@ -111,17 +111,17 @@ export default function PlanetScene({ activeIndex, onPlanetChange }: { activeInd
     const initialTargetZ = -initialSceneIndex * SPACING;
     const initialLookAtIndex = initialSceneIndex + 1;
     const initialLookAtZ = -initialLookAtIndex * SPACING;
-    
+
     const initialCamY = initialActivePlanet.radius * 1.6;
     const initialCamZRelative = initialActivePlanet.radius * 1.7;
-    
+
     cameraRig.position.set(0, 0, initialTargetZ);
     camera.position.set(0, initialCamY, initialCamZRelative);
     lookAtTargetRef.current.set(0, -initialActivePlanet.radius * 2.2, initialLookAtZ);
     camera.lookAt(lookAtTargetRef.current);
 
     // Renderer setup
-    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false, powerPreference: "high-performance" });
+    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, powerPreference: "high-performance" });
     renderer.setSize(window.innerWidth, window.innerHeight);
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
@@ -149,17 +149,17 @@ export default function PlanetScene({ activeIndex, onPlanetChange }: { activeInd
     sunLight.shadow.camera.bottom = -100;
     sunLight.shadow.bias = -0.001;
     cameraRig.add(sunLight);
-    
+
     // Strong rim light from above and behind the active planet
     const rimLight = new THREE.DirectionalLight(initialActivePlanet.color, 6);
     rimLight.position.set(0, 50, -100); // Light from behind
     cameraRig.add(rimLight);
     rimLightRef.current = rimLight;
-    
+
     // Add targets to cameraRig so lights always point relative to the camera
     cameraRig.add(sunLight.target);
     sunLight.target.position.set(0, 0, 0);
-    
+
     cameraRig.add(rimLight.target);
     rimLight.target.position.set(0, 0, 0);
 
@@ -168,9 +168,9 @@ export default function PlanetScene({ activeIndex, onPlanetChange }: { activeInd
     // Create Planets
     SCENE_PLANETS.forEach((p, i) => {
       const zPos = -i * SPACING;
-      
+
       const geometry = new THREE.SphereGeometry(p.radius, 128, 128);
-      
+
       // Try to load texture, fallback to procedural
       let texture;
       let bumpTexture;
@@ -184,7 +184,7 @@ export default function PlanetScene({ activeIndex, onPlanetChange }: { activeInd
       if (BUMP_URLS[p.id]) {
         bumpTexture = textureLoader.load(BUMP_URLS[p.id]);
       }
-      
+
       const material = new THREE.MeshStandardMaterial({
         map: texture,
         color: TEXTURE_URLS[p.id] ? 0xffffff : p.color,
@@ -193,7 +193,7 @@ export default function PlanetScene({ activeIndex, onPlanetChange }: { activeInd
         bumpMap: bumpTexture || (['uranus', 'neptune'].includes(p.id) ? null : texture),
         bumpScale: bumpTexture ? (p.id === 'mercury' ? 0.5 : 2.0) : 0.5,
       });
-      
+
       const mesh = new THREE.Mesh(geometry, material);
       mesh.castShadow = true;
       mesh.receiveShadow = true;
@@ -247,7 +247,7 @@ export default function PlanetScene({ activeIndex, onPlanetChange }: { activeInd
         depthWrite: false,
         fog: true,
       });
-      
+
       const atmosMesh = new THREE.Mesh(atmosGeom, atmosMat);
       atmosMesh.position.set(0, 0, zPos);
       scene.add(atmosMesh);
@@ -261,7 +261,7 @@ export default function PlanetScene({ activeIndex, onPlanetChange }: { activeInd
     let clickStartY = 0;
     const raycaster = new THREE.Raycaster();
     const mouse = new THREE.Vector2();
-    
+
     const onMouseDown = (event: MouseEvent) => {
       isDragging = true;
       previousMousePosition = { x: event.clientX, y: event.clientY };
@@ -271,13 +271,13 @@ export default function PlanetScene({ activeIndex, onPlanetChange }: { activeInd
 
     const onMouseUp = (event: MouseEvent) => {
       isDragging = false;
-      
+
       // Handle click for planet selection
       if (Math.abs(event.clientX - clickStartX) < 5 && Math.abs(event.clientY - clickStartY) < 5) {
         mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
         mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
         raycaster.setFromCamera(mouse, camera);
-        
+
         const intersects = raycaster.intersectObjects(planetsRef.current);
         if (intersects.length > 0) {
           const clickedMesh = intersects[0].object;
@@ -316,7 +316,7 @@ export default function PlanetScene({ activeIndex, onPlanetChange }: { activeInd
     let animationFrameId: number;
     const render = () => {
       const currentActiveSceneIndex = SCENE_PLANETS.length - 1 - activeIndexRef.current;
-      
+
       planetsRef.current.forEach((p, i) => {
         if (!isDragging || i !== currentActiveSceneIndex) {
           p.rotation.y += 0.002; // Auto rotation
@@ -352,7 +352,7 @@ export default function PlanetScene({ activeIndex, onPlanetChange }: { activeInd
         container.removeChild(renderer.domElement);
       }
       renderer.dispose();
-      
+
       // Dispose geometries and materials
       planetsRef.current.forEach(p => {
         p.geometry.dispose();
@@ -371,24 +371,24 @@ export default function PlanetScene({ activeIndex, onPlanetChange }: { activeInd
   // Handle Planet Change Transition
   useEffect(() => {
     if (!cameraRef.current || !sceneRef.current || !cameraRigRef.current) return;
-    
+
     gsap.killTweensOf(cameraRef.current.position);
     gsap.killTweensOf(cameraRigRef.current.position);
     gsap.killTweensOf(lookAtTargetRef.current);
-    
+
     const sceneIndex = SCENE_PLANETS.length - 1 - activeIndex;
     const activePlanet = SCENE_PLANETS[sceneIndex];
     const targetZ = -sceneIndex * SPACING;
-    
+
     const lookAtIndex = sceneIndex + 1;
     const lookAtZ = -lookAtIndex * SPACING;
-    
+
     const prevSceneIndex = prevSceneIndexRef.current;
-    
+
     // Position camera to create the massive horizon effect
     const camY = activePlanet.radius * 1.6;
     const camZRelative = activePlanet.radius * 1.7;
-    
+
     gsap.to(cameraRigRef.current.position, {
       z: targetZ,
       duration: 2.5,
