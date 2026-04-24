@@ -389,14 +389,15 @@ export default function PlanetScene({ activeIndex, onPlanetChange, planetsData }
         mesh.castShadow = false;
         mesh.receiveShadow = false;
       } else if (p.id === 'pulsar') {
-        mesh.material = new THREE.MeshBasicMaterial({ color: 0xffffff });
+        // Reducido el brillo base para que no escandile con el bloom
+        mesh.material = new THREE.MeshBasicMaterial({ color: 0xaaeeff });
         
-        // Haces de emisión (jets)
-        const jetGeom = new THREE.CylinderGeometry(2.5, 300, 4000, 32, 1, true);
+        // Haces de emisión (jets) más sutiles y delgados
+        const jetGeom = new THREE.CylinderGeometry(2.5, 80, 4000, 32, 1, true);
         const jetMat = new THREE.MeshBasicMaterial({ 
-          color: 0x00f3ff, 
+          color: 0x00bfff, 
           transparent: true, 
-          opacity: 0.12,
+          opacity: 0.04,
           blending: THREE.AdditiveBlending,
           side: THREE.DoubleSide,
           depthWrite: false
