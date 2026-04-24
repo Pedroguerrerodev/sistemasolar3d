@@ -85,14 +85,29 @@ const DEEP_SPACE_OBJECTS = [
     gravity: 999999, temp: '-273 °C', moons: 0, diameter: '44 M km',
   },
   {
-    id: 'trappist', name: 'TRAPPIST-1e', distance: '39,46 AÑOS LUZ', distanceKm: 'DE LA TIERRA', color: '#2a5a75',
-    description: 'UN EXOPLANETA ROCOSO QUE PODRÍA ESTAR CUBIERTO POR UN OCÉANO PROFUNDO. ÓRBITA EN LA ZONA HABITABLE DE UNA ESTRELLA ENANA ROJA.',
-    gravity: 0.93, temp: '-10 °C', moons: 0, diameter: '11.600 km',
+    id: 'pulsar', name: 'PSR B1919+21', distance: '2.283 AÑOS LUZ', distanceKm: 'DE LA TIERRA', color: '#ffccfc',
+    description: 'UNA ESTRELLA DE NEUTRONES QUE GIRA A VELOCIDADES VERTIGINOSAS. EMITE RADIACIÓN DESDE SUS POLOS COMO UN FARO CÓSMICO EN LA OSCURIDAD DEL ESPACIO.',
+    gravity: 200000, temp: '1 Millón °C', moons: 0, diameter: '20 km',
   },
   {
     id: 'kepler', name: 'KEPLER-10b', distance: '564 AÑOS LUZ', distanceKm: 'DE LA TIERRA', color: '#ff3300',
     description: 'UN MUNDO DE LAVA INFERNAL QUE ÓRBITA TAN CERCA DE SU ESTRELLA QUE SU SUPERFICIE DEBE ESTAR COMPLETAMENTE FUNDIDA. UN EXOPLANETA EXTREMO Y HOSTIL.',
     gravity: 3.3, temp: '1500 °C', moons: 0, diameter: '18.700 km',
+  },
+  {
+    id: 'trappist', name: 'TRAPPIST-1e', distance: '39,46 AÑOS LUZ', distanceKm: 'DE LA TIERRA', color: '#2a5a75',
+    description: 'UN EXOPLANETA ROCOSO QUE PODRÍA ESTAR CUBIERTO POR UN OCÉANO PROFUNDO. ÓRBITA EN LA ZONA HABITABLE DE UNA ESTRELLA ENANA ROJA.',
+    gravity: 0.93, temp: '-10 °C', moons: 0, diameter: '11.600 km',
+  },
+  {
+    id: 'oort', name: 'NUBE DE OORT', distance: '1 AÑO LUZ', distanceKm: 'LÍMITE DEL SISTEMA', color: '#748eb8',
+    description: 'UNA ENVOLTURA ESFÉRICA GIGANTE DE COMETAS Y ROCAS HELADAS QUE MARCA LA FRONTERA GRAVITACIONAL DEL SOL CON EL ESPACIO INTERESTELAR.',
+    gravity: 0.01, temp: '-268 °C', moons: 0, diameter: 'DESCONOCIDO',
+  },
+  {
+    id: 'voyager', name: 'VOYAGER 1', distance: '22,4 HORAS LUZ', distanceKm: 'EN EL VACÍO', color: '#aaaaaa',
+    description: 'OBJETO CREADO POR LA HUMANIDAD EN 1977. LLEVA UN "DISCO DE ORO" CON MENSAJES DE LA TIERRA, SURCANDO SOLA EL INMENSO FRÍO DEL ESPACIO PROFUNDO.',
+    gravity: 0, temp: '-270 °C', moons: 0, diameter: '3.7 m',
   }
 ];
 
@@ -105,15 +120,30 @@ const PLANET_CURIOSITIES: Record<string, string[]> = {
     'LA MASA DE SAGITARIO A* ES UNOS 4 MILLONES DE VECES LA DEL SOL.',
     'CUALQUIER MATERIA QUE CAE EN EL AGUJERO NEGRO SUFRE UN PROCESO LLAMADO "ESPAGUETIZACIÓN".'
   ],
-  trappist: [
-    'EL SISTEMA TRAPPIST-1 TIENE AL MENOS 7 PLANETAS DEL TAMAÑO DE LA TIERRA.',
-    'SU ESTRELLA ES TAN PEQUEÑA QUE DESDE LA SUPERFICIE DE ESTE PLANETA SE VERÍA GIGANTE Y ROJA.',
-    'PODRÍA TENER MÁS AGUA LÍQUIDA QUE TODOS LOS OCÉANOS DE LA TIERRA JUNTOS.'
+  pulsar: [
+    'DA VUELTAS SOBRE SÍ MISMA EN CUESTIÓN DE SEGUNDOS O FRACCIONES DE SEGUNDO.',
+    'FUE EL PRIMER PÚLSAR DE LA HISTORIA EN SER DESCUBIERTO, EN 1967.',
+    'SU DENSIDAD ES TANTA QUE UNA CUCHARADITA PESARÍA MILLONES DE TONELADAS.'
   ],
   kepler: [
     'ES EL PRIMER EXOPLANETA ROCOSO CONFIRMADO POR LA MISIÓN KEPLER.',
     'SUS OCÉANOS DE LAVA PODRÍAN SER MÁS PROFUNDOS QUE LAS FOSAS MÁS HONDAS DE LA TIERRA.',
     'UN AÑO EN KEPLER-10b DURA MENOS DE UN DÍA TERRESTRE.'
+  ],
+  trappist: [
+    'EL SISTEMA TRAPPIST-1 TIENE AL MENOS 7 PLANETAS DEL TAMAÑO DE LA TIERRA.',
+    'SU ESTRELLA ES TAN PEQUEÑA QUE DESDE LA SUPERFICIE DE ESTE PLANETA SE VERÍA GIGANTE Y ROJA.',
+    'PODRÍA TENER MÁS AGUA LÍQUIDA QUE TODOS LOS OCÉANOS DE LA TIERRA JUNTOS.'
+  ],
+  oort: [
+    'RECIBE SU NOMBRE DEL ASTRÓNOMO HOLANDÉS JAN OORT.',
+    'ESTÁ TAN LEJOS QUE LA LUZ DEL SOL TARDA UN AÑO ENTERO EN LLEGAR HASTA ALLÍ.',
+    'ES EL HOGAR DE LOS COMETAS DE PERIODO LARGO QUE A VECES VISITAN LA TIERRA.'
+  ],
+  voyager: [
+    'ES EL OBJETO HECHO POR EL SER HUMANO MÁS ALEJADO DE LA TIERRA.',
+    'SU DISCO DE ORO CONTIENE SALUDOS EN 55 IDIOMAS Y MÚSICA TERRESTRE.',
+    'AUNQUE SE APAGUE PRONTO, SEGUIRÁ VAGANDO POR EL ESPACIO DURANTE MILLONES DE AÑOS.'
   ],
   pluto: [
     'UN AÑO EN PLUTÓN DURA 248 AÑOS TERRESTRES.',
@@ -241,7 +271,7 @@ export default function App() {
       setActiveIndex(prev => {
         if (prev < PLANETS_ALL.length - 1) {
           startAmbient();
-          if (prev === 2) {
+          if (prev === 5) {
             playReturnTransition(); // Regresar música al sistema solar
           }
           return prev + 1;
@@ -252,7 +282,7 @@ export default function App() {
       setActiveIndex(prev => {
         // Bloquear desplazamiento hacia el espacio profundo desde Plutón (índice 3)
         // El usuario solo puede ir desde Plutón hacia dentro o usar el botón
-        if (prev === 3) return prev;
+        if (prev === 6) return prev;
 
         if (prev > 0) {
           startAmbient();
@@ -264,14 +294,14 @@ export default function App() {
   }, [isTransitioning, startAmbient, hyperJumping, playReturnTransition]);
 
   const triggerHyperspace = () => {
-    if (activeIndex !== 3) return; // Solo desde Plutón
+    if (activeIndex !== 6) return; // Solo desde Plutón
     setHyperJumping(true);
     startAmbient(); // Asegurar sonido
     playHyperspaceTransition(); // Iniciar transición hiperespacial y cambio de música
 
     // Hyperjump sequence y transición de canción duran 3 segundos
     setTimeout(() => {
-      setActiveIndex(2); // Jump to Kepler / Espacio profundo
+      setActiveIndex(5); // Jump to Voyager / Espacio profundo / Espacio profundo
     }, 2800); // Casi al final del efecto de sonido
 
     setTimeout(() => {
@@ -388,7 +418,7 @@ export default function App() {
           title={muted ? 'Activar sonido (M)' : 'Silenciar (M)'}
           className="text-gray-500 hover:text-white transition-colors text-lg leading-none"
         >
-          {muted ? '🔇' : '🔊'}
+          {muted ? '??' : '??'}
         </button>
         <span className="text-[8px] text-gray-600 tracking-widest hidden md:block text-right">
           SCROLL / SWIPE PARA DESCENDER<br />
@@ -409,11 +439,11 @@ export default function App() {
       )}
 
       {/* Center Content (Next Planet Name) */}
-      {activeIndex > 0 && activeIndex !== 3 && !hyperJumping && (
+      {activeIndex > 0 && activeIndex !== 6 && !hyperJumping && (
         <div
           className="absolute top-[14%] md:top-[18%] left-1/2 -translate-x-1/2 text-center tracking-[0.2em] z-20 cursor-pointer opacity-60 hover:opacity-100 transition-opacity pl-[0.2em]"
           onClick={() => {
-            if (activeIndex !== 3) navigatePlanet('prev');
+            if (activeIndex !== 6) navigatePlanet('prev');
           }}
         >
           <AnimatePresence mode="wait">
@@ -432,7 +462,7 @@ export default function App() {
         </div>
       )}
 
-      {/* HUD RADAR ORBITAL (Lateral Izquierdo) */}
+      {/* HUD RADAR ÓRBITAL (Lateral Izquierdo) */}
       <motion.div
         initial={{ opacity: 0, x: -50 }}
         animate={{ opacity: 1, x: 0 }}
@@ -440,7 +470,7 @@ export default function App() {
         className="absolute left-2 md:left-10 top-1/2 -translate-y-1/2 z-30 flex flex-col items-center gap-2 md:gap-4 py-8 scale-75 md:scale-100 origin-left"
       >
         <p className="text-[7px] tracking-[0.4em] text-gray-500 mb-2 rotate-180" style={{ writingMode: 'vertical-rl' }}>
-          {activeIndex < 3 ? 'ESPACIO PROFUNDO' : 'SISTEMA SOLAR'}
+          {activeIndex < 6 ? 'ESPACIO PROFUNDO' : 'SISTEMA SOLAR'}
         </p>
         <div className="relative flex flex-col items-center gap-4 md:gap-6">
           {/* Línea conectora base */}
@@ -465,7 +495,7 @@ export default function App() {
                 onClick={() => {
                   if (isTransitioning) return;
                   startAmbient();
-                  if (activeIndex < 3 && idx >= 3) {
+                  if (activeIndex < 6 && idx >= 6) {
                     playReturnTransition();
                   }
                   setActiveIndex(idx);
@@ -513,7 +543,7 @@ export default function App() {
             style={{ maxHeight: '100%' }}
           >
             <p className="text-[8px] md:text-[10px] tracking-[0.3em] text-[#e89c51] mb-1 md:mb-2 pl-[0.3em] overflow-hidden shrink-0">
-              <SplitTextReveal text={activePlanet.id === 'blackhole' ? "AGUJERO NEGRO" : (activeIndex < 3 ? "EXOPLANETA" : "PLANETA")} delay={0.1} />
+              <SplitTextReveal text={activePlanet.id === 'blackhole' ? "AGUJERO NEGRO" : (activeIndex < 6 ? "EXOPLANETA" : "PLANETA")} delay={0.1} />
             </p>
             <h2 className="text-4xl md:text-6xl md:text-[8rem] tracking-[0.2em] font-sans font-thin text-white mix-blend-overlay mb-4 md:mb-6 pl-[0.2em] opacity-80 uppercase leading-none shrink-0" style={{ whiteSpace: 'nowrap' }}>
               <SplitTextReveal text={activePlanet.name} delay={0.2} style={{ letterSpacing: '0.2em' }} />
@@ -609,7 +639,7 @@ export default function App() {
                     transition={{ delay: 0.2 }}
                     className="text-[8px] tracking-[0.4em] text-[#e89c51] mb-2 uppercase"
                   >
-                    {activePlanet.id === 'blackhole' ? 'ANOMALÍA CÓSMICA' : (activeIndex < 3 ? 'REGISTRO ESTELAR' : 'REGISTRO PLANETARIO')}
+                    {activePlanet.id === 'blackhole' ? 'ANOMALÍA CÓSMICA' : (activeIndex < 6 ? 'REGISTRO ESTELAR' : 'REGISTRO PLANETARIO')}
                   </motion.p>
                   <motion.h2
                     initial={{ opacity: 0, x: 20 }}
@@ -729,7 +759,7 @@ export default function App() {
             className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50 flex flex-col items-center justify-center pointer-events-none w-full max-w-lg"
           >
             <div className="text-red-500 font-mono text-2xl md:text-3xl tracking-[0.3em] text-center animate-pulse drop-shadow-[0_0_15px_rgba(239,68,68,0.8)] px-4">
-              ⚠ ALERTA CRÍTICA ⚠
+              ? ALERTA CRÍTICA ?
             </div>
             <div className="mt-4 bg-red-950/40 border border-red-500/50 backdrop-blur-md px-8 py-4 rounded-lg text-red-200 text-center uppercase tracking-widest text-[9px] md:text-[10px] mx-4">
               Aproximación al horizonte de sucesos

@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+﻿import { useEffect, useRef } from 'react';
 import * as THREE from 'three';
 import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
 import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
@@ -21,8 +21,8 @@ const PLANETS = [
 // Reverse so Mercury is at Z=0, Venus at Z=-400, etc.
 const SCENE_PLANETS = [...PLANETS].reverse();
 const SPACING = 400;
-const DEEP_SPACE_GAP = 8000;
-const DEEP_SPACE_IDS = ['blackhole', 'trappist', 'kepler'];
+const DEEP_SPACE_GAP = 1200; // Reducido para que la transición sea mucho más fluida a petición del usuario.
+const DEEP_SPACE_IDS = ['blackhole', 'pulsar', 'kepler', 'trappist', 'oort', 'voyager'];
 
 function getZPos(index: number, planetsArray: any[]) {
   if (index === 0) return 0;
@@ -120,7 +120,7 @@ export default function PlanetScene({ activeIndex, onPlanetChange, planetsData }
 
     // Scene setup
     const scene = new THREE.Scene();
-    scene.background = null; // transparent — StarField visible behind
+    scene.background = null; // transparent â€” StarField visible behind
     // Fog exponencial que desvanece planetas lejanos sin cubrir el fondo
     scene.fog = new THREE.FogExp2('#000000', 0.0022);
     sceneRef.current = scene;
@@ -388,6 +388,79 @@ export default function PlanetScene({ activeIndex, onPlanetChange, planetsData }
         // Evitamos que emita sombras en la bounding box o sus hijos
         mesh.castShadow = false;
         mesh.receiveShadow = false;
+      } else if (p.id === 'pulsar') {
+        mesh.material = new THREE.MeshBasicMaterial({ color: 0xffffff });
+        
+        // Haces de emisión (jets)
+        const jetGeom = new THREE.CylinderGeometry(2.5, 300, 4000, 32, 1, true);
+        const jetMat = new THREE.MeshBasicMaterial({ 
+          color: 0x00f3ff, 
+          transparent: true, 
+          opacity: 0.12,
+          blending: THREE.AdditiveBlending,
+          side: THREE.DoubleSide,
+          depthWrite: false
+        });
+        
+        const jet1 = new THREE.Mesh(jetGeom, jetMat);
+        jet1.position.y = 2000;
+        mesh.add(jet1);
+        
+        const jet2 = new THREE.Mesh(jetGeom, jetMat);
+        jet2.position.y = -2000;
+        jet2.rotation.x = Math.PI;
+        mesh.add(jet2);
+
+        mesh.userData.isPulsar = true;
+        mesh.castShadow = false;
+        mesh.receiveShadow = false;
+      } else if (p.id === 'oort') {
+        const oortCount = 8000;
+        const oortGeom = new THREE.BufferGeometry();
+        const oortPos = new Float32Array(oortCount * 3);
+        const oortRadius = radius * 4.5;
+        
+        for (let j = 0; j < oortCount; j++) {
+           const theta = Math.random() * Math.PI * 2;
+           const phi = Math.acos(2 * Math.random() - 1);
+           const r = oortRadius + (Math.random() - 0.5) * radius * 3.0;
+           
+           oortPos[j * 3] = r * Math.sin(phi) * Math.cos(theta);
+           oortPos[j * 3 + 1] = r * Math.sin(phi) * Math.sin(theta);
+           oortPos[j * 3 + 2] = r * Math.cos(phi);
+        }
+        oortGeom.setAttribute('position', new THREE.BufferAttribute(oortPos, 3));
+        const oortMat = new THREE.PointsMaterial({ color: 0x8d9cba, size: 2.0, transparent: true, opacity: 0.8 });
+        const oortMesh = new THREE.Points(oortGeom, oortMat);
+        mesh.add(oortMesh);
+        
+        mesh.material = new THREE.MeshBasicMaterial({ transparent: true, opacity: 0, depthWrite: false });
+        mesh.castShadow = false;
+        mesh.receiveShadow = false;
+        mesh.userData.isOort = true;
+      } else if (p.id === 'voyager') {
+        mesh.material = new THREE.MeshBasicMaterial({ transparent: true, opacity: 0, depthWrite: false });
+        
+        const bodyGeom = new THREE.BoxGeometry(25, 25, 25);
+        const satMat = new THREE.MeshStandardMaterial({ color: 0xaaaaaa, metalness: 0.9, roughness: 0.4 });
+        const body = new THREE.Mesh(bodyGeom, satMat);
+        
+        const dishGeom = new THREE.ConeGeometry(35, 12, 32);
+        const dish = new THREE.Mesh(dishGeom, satMat);
+        dish.position.z = 18;
+        dish.rotation.x = Math.PI / 2;
+        body.add(dish);
+        
+        const rodGeom = new THREE.CylinderGeometry(1, 1, 120);
+        const rod = new THREE.Mesh(rodGeom, satMat);
+        rod.position.x = 60;
+        rod.rotation.z = Math.PI / 2;
+        body.add(rod);
+        
+        mesh.add(body);
+        mesh.castShadow = true;
+        mesh.receiveShadow = true;
+        mesh.userData.isVoyager = true;
       } else {
         mesh.castShadow = true;
         mesh.receiveShadow = true;
@@ -401,7 +474,7 @@ export default function PlanetScene({ activeIndex, onPlanetChange, planetsData }
       planetsRef.current.push(mesh);
 
       // Atmosphere glow (Fresnel-like effect using custom shader)
-      if (p.id !== 'blackhole') {
+      if (!['blackhole', 'pulsar', 'oort', 'voyager'].includes(p.id)) {
         const atmosGeom = new THREE.SphereGeometry(radius * 1.15, 64, 64);
         const atmosMat = new THREE.ShaderMaterial({
           uniforms: THREE.UniformsUtils.merge([
@@ -658,6 +731,14 @@ export default function PlanetScene({ activeIndex, onPlanetChange, planetsData }
             // Rotamos el agujero negro sobre Y solo un poco, y animamos el disco 
             // Si queremos que el disco de acreción no tambalee, rotamos en Z (giro plano)
             p.rotation.y += 0.0005;
+          } else if (p.userData.isPulsar) {
+            p.rotation.y += 0.3; // Rotación ultra rápida
+            p.rotation.x += 0.05;
+          } else if (p.userData.isOort) {
+            p.rotation.y += 0.0002; // Súper lento
+          } else if (p.userData.isVoyager) {
+            p.rotation.y += 0.005; // Rotación de satélite
+            p.rotation.z += 0.002;
           } else {
             p.rotation.y += 0.002; // Auto rotation
           }
