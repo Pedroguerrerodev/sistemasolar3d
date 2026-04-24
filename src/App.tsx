@@ -1,4 +1,4 @@
-﻿/**
+/**
  * @license
  * SPDX-License-Identifier: Apache-2.0
  */
@@ -85,29 +85,14 @@ const DEEP_SPACE_OBJECTS = [
     gravity: 999999, temp: '-273 °C', moons: 0, diameter: '44 M km',
   },
   {
-    id: 'pulsar', name: 'PSR B1919+21', distance: '2.283 AÑOS LUZ', distanceKm: 'DE LA TIERRA', color: '#ffccfc',
-    description: 'UNA ESTRELLA DE NEUTRONES QUE GIRA A VELOCIDADES VERTIGINOSAS. EMITE RADIACIÓN DESDE SUS POLOS COMO UN FARO CÓSMICO EN LA OSCURIDAD DEL ESPACIO.',
-    gravity: 200000, temp: '1 Millón °C', moons: 0, diameter: '20 km',
-  },
-  {
-    id: 'kepler', name: 'KEPLER-10b', distance: '564 AÑOS LUZ', distanceKm: 'DE LA TIERRA', color: '#ff3300',
-    description: 'UN MUNDO DE LAVA INFERNAL QUE ÓRBITA TAN CERCA DE SU ESTRELLA QUE SU SUPERFICIE DEBE ESTAR COMPLETAMENTE FUNDIDA. UN EXOPLANETA EXTREMO Y HOSTIL.',
-    gravity: 3.3, temp: '1500 °C', moons: 0, diameter: '18.700 km',
-  },
-  {
     id: 'trappist', name: 'TRAPPIST-1e', distance: '39,46 AÑOS LUZ', distanceKm: 'DE LA TIERRA', color: '#2a5a75',
     description: 'UN EXOPLANETA ROCOSO QUE PODRÍA ESTAR CUBIERTO POR UN OCÉANO PROFUNDO. ÓRBITA EN LA ZONA HABITABLE DE UNA ESTRELLA ENANA ROJA.',
     gravity: 0.93, temp: '-10 °C', moons: 0, diameter: '11.600 km',
   },
   {
-    id: 'oort', name: 'NUBE DE OORT', distance: '1 AÑO LUZ', distanceKm: 'LÍMITE DEL SISTEMA', color: '#748eb8',
-    description: 'UNA ENVOLTURA ESFÉRICA GIGANTE DE COMETAS Y ROCAS HELADAS QUE MARCA LA FRONTERA GRAVITACIONAL DEL SOL CON EL ESPACIO INTERESTELAR.',
-    gravity: 0.01, temp: '-268 °C', moons: 0, diameter: 'DESCONOCIDO',
-  },
-  {
-    id: 'voyager', name: 'VOYAGER 1', distance: '22,4 HORAS LUZ', distanceKm: 'EN EL VACÍO', color: '#aaaaaa',
-    description: 'OBJETO CREADO POR LA HUMANIDAD EN 1977. LLEVA UN "DISCO DE ORO" CON MENSAJES DE LA TIERRA, SURCANDO SOLA EL INMENSO FRÍO DEL ESPACIO PROFUNDO.',
-    gravity: 0, temp: '-270 °C', moons: 0, diameter: '3.7 m',
+    id: 'kepler', name: 'KEPLER-10b', distance: '564 AÑOS LUZ', distanceKm: 'DE LA TIERRA', color: '#ff3300',
+    description: 'UN MUNDO DE LAVA INFERNAL QUE ÓRBITA TAN CERCA DE SU ESTRELLA QUE SU SUPERFICIE DEBE ESTAR COMPLETAMENTE FUNDIDA. UN EXOPLANETA EXTREMO Y HOSTIL.',
+    gravity: 3.3, temp: '1500 °C', moons: 0, diameter: '18.700 km',
   }
 ];
 
@@ -120,30 +105,15 @@ const PLANET_CURIOSITIES: Record<string, string[]> = {
     'LA MASA DE SAGITARIO A* ES UNOS 4 MILLONES DE VECES LA DEL SOL.',
     'CUALQUIER MATERIA QUE CAE EN EL AGUJERO NEGRO SUFRE UN PROCESO LLAMADO "ESPAGUETIZACIÓN".'
   ],
-  pulsar: [
-    'DA VUELTAS SOBRE SÍ MISMA EN CUESTIÓN DE SEGUNDOS O FRACCIONES DE SEGUNDO.',
-    'FUE EL PRIMER PÚLSAR DE LA HISTORIA EN SER DESCUBIERTO, EN 1967.',
-    'SU DENSIDAD ES TANTA QUE UNA CUCHARADITA PESARÍA MILLONES DE TONELADAS.'
-  ],
-  kepler: [
-    'ES EL PRIMER EXOPLANETA ROCOSO CONFIRMADO POR LA MISIÓN KEPLER.',
-    'SUS OCÉANOS DE LAVA PODRÍAN SER MÁS PROFUNDOS QUE LAS FOSAS MÁS HONDAS DE LA TIERRA.',
-    'UN AÑO EN KEPLER-10b DURA MENOS DE UN DÍA TERRESTRE.'
-  ],
   trappist: [
     'EL SISTEMA TRAPPIST-1 TIENE AL MENOS 7 PLANETAS DEL TAMAÑO DE LA TIERRA.',
     'SU ESTRELLA ES TAN PEQUEÑA QUE DESDE LA SUPERFICIE DE ESTE PLANETA SE VERÍA GIGANTE Y ROJA.',
     'PODRÍA TENER MÁS AGUA LÍQUIDA QUE TODOS LOS OCÉANOS DE LA TIERRA JUNTOS.'
   ],
-  oort: [
-    'RECIBE SU NOMBRE DEL ASTRÓNOMO HOLANDÉS JAN OORT.',
-    'ESTÁ TAN LEJOS QUE LA LUZ DEL SOL TARDA UN AÑO ENTERO EN LLEGAR HASTA ALLÍ.',
-    'ES EL HOGAR DE LOS COMETAS DE PERIODO LARGO QUE A VECES VISITAN LA TIERRA.'
-  ],
-  voyager: [
-    'ES EL OBJETO HECHO POR EL SER HUMANO MÁS ALEJADO DE LA TIERRA.',
-    'SU DISCO DE ORO CONTIENE SALUDOS EN 55 IDIOMAS Y MÚSICA TERRESTRE.',
-    'AUNQUE SE APAGUE PRONTO, SEGUIRÁ VAGANDO POR EL ESPACIO DURANTE MILLONES DE AÑOS.'
+  kepler: [
+    'ES EL PRIMER EXOPLANETA ROCOSO CONFIRMADO POR LA MISIÓN KEPLER.',
+    'SUS OCÉANOS DE LAVA PODRÍAN SER MÁS PROFUNDOS QUE LAS FOSAS MÁS HONDAS DE LA TIERRA.',
+    'UN AÑO EN KEPLER-10b DURA MENOS DE UN DÍA TERRESTRE.'
   ],
   pluto: [
     'UN AÑO EN PLUTÓN DURA 248 AÑOS TERRESTRES.',
@@ -206,16 +176,42 @@ export default function App() {
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [showPanel, setShowPanel] = useState(false);
   const [weightKg, setWeightKg] = useState('');
-  const { startAmbient, playPlanetSound, playHyperspaceTransition, playReturnTransition, toggleMute, muted, started, playWarningBeep, playSwallowBoom } = useSpaceAudio();
+  const { startAmbient, playPlanetSound, playHyperspaceTransition, playReturnTransition, toggleMute, muted, started, playWarningBeep, playSwallowBoom, playHeartbeat } = useSpaceAudio();
 
   const [hyperJumping, setHyperJumping] = useState(false);
   const [blackHoleWarningTimer, setBlackHoleWarningTimer] = useState<number | null>(null);
   const [isSwallowed, setIsSwallowed] = useState(false);
+  const [heartRate, setHeartRate] = useState<number | null>(null);
 
   const handlePreloaderComplete = useCallback(() => {
     setShowPreloader(false);
     setShowIntro(true);
   }, []);
+
+  // Efecto latido corazón espacio profundo
+  useEffect(() => {
+    let heartbeatId: ReturnType<typeof setInterval>;
+    if (activeIndex < 3 && !isSwallowed && started) {
+      let bpm = 70;
+      let intensity = 1.0;
+
+      if (activeIndex === 0) {
+        const timer = blackHoleWarningTimer !== null ? blackHoleWarningTimer : 20;
+        bpm = Math.floor(100 + (20 - timer) * 4); // Sube de 100 a 180 pulsaciones
+        intensity = 2.0; // Latido fuerte
+      }
+
+      setHeartRate(bpm);
+      const intervalMs = Math.max(300, Math.floor(60000 / bpm));
+
+      heartbeatId = setInterval(() => {
+        playHeartbeat(intensity);
+      }, intervalMs);
+    } else {
+      setHeartRate(null);
+    }
+    return () => clearInterval(heartbeatId);
+  }, [activeIndex, isSwallowed, started, playHeartbeat, blackHoleWarningTimer]);
 
   const handleIntroComplete = useCallback(() => {
     setShowIntro(false);
@@ -271,7 +267,7 @@ export default function App() {
       setActiveIndex(prev => {
         if (prev < PLANETS_ALL.length - 1) {
           startAmbient();
-          if (prev === 5) {
+          if (prev === 2) {
             playReturnTransition(); // Regresar música al sistema solar
           }
           return prev + 1;
@@ -282,7 +278,7 @@ export default function App() {
       setActiveIndex(prev => {
         // Bloquear desplazamiento hacia el espacio profundo desde Plutón (índice 3)
         // El usuario solo puede ir desde Plutón hacia dentro o usar el botón
-        if (prev === 6) return prev;
+        if (prev === 3) return prev;
 
         if (prev > 0) {
           startAmbient();
@@ -294,14 +290,14 @@ export default function App() {
   }, [isTransitioning, startAmbient, hyperJumping, playReturnTransition]);
 
   const triggerHyperspace = () => {
-    if (activeIndex !== 6) return; // Solo desde Plutón
+    if (activeIndex !== 3) return; // Solo desde Plutón
     setHyperJumping(true);
     startAmbient(); // Asegurar sonido
     playHyperspaceTransition(); // Iniciar transición hiperespacial y cambio de música
 
     // Hyperjump sequence y transición de canción duran 3 segundos
     setTimeout(() => {
-      setActiveIndex(5); // Jump to Voyager / Espacio profundo / Espacio profundo
+      setActiveIndex(2); // Jump to Kepler / Espacio profundo
     }, 2800); // Casi al final del efecto de sonido
 
     setTimeout(() => {
@@ -418,7 +414,7 @@ export default function App() {
           title={muted ? 'Activar sonido (M)' : 'Silenciar (M)'}
           className="text-gray-500 hover:text-white transition-colors text-lg leading-none"
         >
-          {muted ? '??' : '??'}
+          {muted ? '🔇' : '🔊'}
         </button>
         <span className="text-[8px] text-gray-600 tracking-widest hidden md:block text-right">
           SCROLL / SWIPE PARA DESCENDER<br />
@@ -439,11 +435,11 @@ export default function App() {
       )}
 
       {/* Center Content (Next Planet Name) */}
-      {activeIndex > 0 && activeIndex !== 6 && !hyperJumping && (
+      {activeIndex > 0 && activeIndex !== 3 && !hyperJumping && (
         <div
           className="absolute top-[14%] md:top-[18%] left-1/2 -translate-x-1/2 text-center tracking-[0.2em] z-20 cursor-pointer opacity-60 hover:opacity-100 transition-opacity pl-[0.2em]"
           onClick={() => {
-            if (activeIndex !== 6) navigatePlanet('prev');
+            if (activeIndex !== 3) navigatePlanet('prev');
           }}
         >
           <AnimatePresence mode="wait">
@@ -462,16 +458,75 @@ export default function App() {
         </div>
       )}
 
-      {/* HUD RADAR ÓRBITAL (Lateral Izquierdo) */}
+      {/* Monitor de Pulsaciones (BPM) */}
+      <AnimatePresence>
+        {heartRate !== null && !isSwallowed && (
+          <motion.div
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: 20 }}
+            className="absolute top-14 md:top-20 right-4 md:right-10 z-20 flex items-center gap-3 backdrop-blur-md bg-black/40 border border-red-500/30 px-3 py-1.5 md:px-4 md:py-2 rounded-full pointer-events-none"
+          >
+            <motion.div
+              animate={{ opacity: [1, 0.4, 1], scale: [1, 1.2, 1] }}
+              transition={{ duration: 60 / heartRate, repeat: Infinity, ease: "easeInOut" }}
+              className="text-red-500 flex items-center justify-center drop-shadow-[0_0_8px_rgba(239,68,68,0.8)]"
+            >
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
+              </svg>
+            </motion.div>
+            <div className="font-mono text-red-500 font-bold text-sm md:text-lg drop-shadow-[0_0_5px_rgba(239,68,68,0.6)]">
+              {Math.round(heartRate)} <span className="text-[10px] md:text-xs opacity-70">BPM</span>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* HUD RADAR ORBITAL (Lateral Izquierdo) */}
       <motion.div
         initial={{ opacity: 0, x: -50 }}
-        animate={{ opacity: 1, x: 0 }}
-        transition={{ delay: showIntro ? 0 : 3.5, duration: 1.5 }}
-        className="absolute left-2 md:left-10 top-1/2 -translate-y-1/2 z-30 flex flex-col items-center gap-2 md:gap-4 py-8 scale-75 md:scale-100 origin-left"
+        animate={
+          activeIndex < 3
+            ? {
+              opacity: [1, 0.4, 0.9, 0.2, 1, 0.6, 1],
+              x: [0, -4, 3, -1, 5, -2, 0],
+              filter: [
+                "hue-rotate(0deg) sepia(0%) blur(0px)",
+                "hue-rotate(90deg) sepia(100%) blur(1px)",
+                "hue-rotate(-45deg) sepia(50%) blur(2px)",
+                "hue-rotate(180deg) sepia(200%) blur(0px)",
+                "hue-rotate(0deg) sepia(0%) blur(0px)"
+              ]
+            }
+            : { opacity: 1, x: 0, filter: "hue-rotate(0deg) sepia(0%) blur(0px)" }
+        }
+        transition={
+          activeIndex < 3
+            ? {
+              duration: 0.7,
+              repeat: Infinity,
+              repeatType: "mirror",
+              ease: "circInOut"
+            }
+            : { delay: showIntro ? 0 : 3.5, duration: 1.5 }
+        }
+        className={`absolute left-2 md:left-10 top-1/2 -translate-y-1/2 z-30 flex flex-col items-center gap-2 md:gap-4 py-8 scale-75 md:scale-100 origin-left ${activeIndex < 3 ? "mix-blend-screen" : ""
+          }`}
       >
-        <p className="text-[7px] tracking-[0.4em] text-gray-500 mb-2 rotate-180" style={{ writingMode: 'vertical-rl' }}>
-          {activeIndex < 6 ? 'ESPACIO PROFUNDO' : 'SISTEMA SOLAR'}
-        </p>
+        <motion.p
+          animate={
+            activeIndex < 3 ? {
+              color: ["#ef4444", "#ffffff", "#ef4444", "#4ade80", "#ef4444"],
+              textShadow: ["0 0 8px #ef4444", "0 0 0px transparent", "0 0 10px #ef4444", "0 0 0px transparent", "0 0 8px #ef4444"],
+            } : { color: "#6b7280", textShadow: "0 0 0px transparent" }
+          }
+          transition={{ duration: 0.5, repeat: Infinity, repeatType: "mirror" }}
+          className={`text-[7px] tracking-[0.4em] mb-2 rotate-180 ${activeIndex < 3 ? "font-bold" : "text-gray-500"}`}
+          style={{ writingMode: "vertical-rl" }}
+        >
+          {activeIndex < 3 ? "SEÑAL PERDIDA" : "SISTEMA SOLAR"}
+        </motion.p>
         <div className="relative flex flex-col items-center gap-4 md:gap-6">
           {/* Línea conectora base */}
           <div className="absolute top-0 bottom-0 w-[1px] bg-white/10 z-0"></div>
@@ -495,7 +550,7 @@ export default function App() {
                 onClick={() => {
                   if (isTransitioning) return;
                   startAmbient();
-                  if (activeIndex < 6 && idx >= 6) {
+                  if (activeIndex < 3 && idx >= 3) {
                     playReturnTransition();
                   }
                   setActiveIndex(idx);
@@ -543,7 +598,7 @@ export default function App() {
             style={{ maxHeight: '100%' }}
           >
             <p className="text-[8px] md:text-[10px] tracking-[0.3em] text-[#e89c51] mb-1 md:mb-2 pl-[0.3em] overflow-hidden shrink-0">
-              <SplitTextReveal text={activePlanet.id === 'blackhole' ? "AGUJERO NEGRO" : (activeIndex < 6 ? "EXOPLANETA" : "PLANETA")} delay={0.1} />
+              <SplitTextReveal text={activePlanet.id === 'blackhole' ? "AGUJERO NEGRO" : (activeIndex < 3 ? "EXOPLANETA" : "PLANETA")} delay={0.1} />
             </p>
             <h2 className="text-4xl md:text-6xl md:text-[8rem] tracking-[0.2em] font-sans font-thin text-white mix-blend-overlay mb-4 md:mb-6 pl-[0.2em] opacity-80 uppercase leading-none shrink-0" style={{ whiteSpace: 'nowrap' }}>
               <SplitTextReveal text={activePlanet.name} delay={0.2} style={{ letterSpacing: '0.2em' }} />
@@ -639,7 +694,7 @@ export default function App() {
                     transition={{ delay: 0.2 }}
                     className="text-[8px] tracking-[0.4em] text-[#e89c51] mb-2 uppercase"
                   >
-                    {activePlanet.id === 'blackhole' ? 'ANOMALÍA CÓSMICA' : (activeIndex < 6 ? 'REGISTRO ESTELAR' : 'REGISTRO PLANETARIO')}
+                    {activePlanet.id === 'blackhole' ? 'ANOMALÍA CÓSMICA' : (activeIndex < 3 ? 'REGISTRO ESTELAR' : 'REGISTRO PLANETARIO')}
                   </motion.p>
                   <motion.h2
                     initial={{ opacity: 0, x: 20 }}
@@ -759,7 +814,7 @@ export default function App() {
             className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50 flex flex-col items-center justify-center pointer-events-none w-full max-w-lg"
           >
             <div className="text-red-500 font-mono text-2xl md:text-3xl tracking-[0.3em] text-center animate-pulse drop-shadow-[0_0_15px_rgba(239,68,68,0.8)] px-4">
-              ? ALERTA CRÍTICA ?
+              ⚠ ALERTA CRÍTICA ⚠
             </div>
             <div className="mt-4 bg-red-950/40 border border-red-500/50 backdrop-blur-md px-8 py-4 rounded-lg text-red-200 text-center uppercase tracking-widest text-[9px] md:text-[10px] mx-4">
               Aproximación al horizonte de sucesos

@@ -1,0 +1,1 @@
+﻿const fs = require('fs'); let code = fs.readFileSync('src/App.tsx', 'utf-8'); code = code.replace(/(\s*)(<p className=\x22text-\[7px\] tracking-\[0.4em\] text-\[#e89c51\] mt-2 rotate-180\x22 style={{ writingMode: 'vertical-rl' }}>POSICIÓN<\/p>)/g, '\  </div>\\').replace(/(<\/div>\s*);\s*}\)}\s*<\/div>/g, '\); })}</div>); })()}\\n'); fs.writeFileSync('src/App.tsx', code);

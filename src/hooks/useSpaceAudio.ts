@@ -307,5 +307,39 @@ export function useSpaceAudio() {
         }
     }, [muted]);
 
-    return { startAmbient, playPlanetSound, playHyperspaceTransition, playReturnTransition, toggleMute, muted, started, playWarningBeep, playSwallowBoom };
+    // SFX Latido Corazón Espacio Profundo
+    const playHeartbeat = useCallback((intensity: number = 1) => {
+        if (muted || !audioCtxRef.current) {
+            const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;
+            audioCtxRef.current = new AudioContextClass();
+        }
+
+        const ctx = audioCtxRef.current;
+        if (!ctx || muted) return;
+        if (ctx.state === 'suspended') ctx.resume();
+
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+
+        // Frecuencia con más armónicos para que sea audible en móviles/portátiles
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(100, ctx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(40, ctx.currentTime + 0.5);
+
+        // Curva ADSR para el latido (Bum... bum)
+        const maxVol = Math.min(2.0, 0.8 * intensity); // Volumen más fuerte para asegurar que se oye
+        gain.gain.setValueAtTime(0, ctx.currentTime);
+        gain.gain.linearRampToValueAtTime(maxVol, ctx.currentTime + 0.05); // Primer golpe
+        gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.15);
+        gain.gain.linearRampToValueAtTime(maxVol * 0.7, ctx.currentTime + 0.25); // Segundo golpe
+        gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.4);
+
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+
+        osc.start(ctx.currentTime);
+        osc.stop(ctx.currentTime + 0.5);
+    }, [muted]);
+
+    return { startAmbient, playPlanetSound, playHyperspaceTransition, playReturnTransition, toggleMute, muted, started, playWarningBeep, playSwallowBoom, playHeartbeat };
 }
