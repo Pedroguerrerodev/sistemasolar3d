@@ -1,140 +1,84 @@
-import { useRef, useCallback, useState } from 'react';
-
-// Frecuencias graves únicas por planeta (de Plutón a Mercurio)
-const PLANET_NOTES = [65.41, 73.42, 82.41, 87.31, 98.0, 110.0, 130.81, 146.83, 164.81];
+import { useRef, useCallback, useState, useEffect } from 'react';
 
 export function useSpaceAudio() {
-    const ctxRef = useRef<AudioContext | null>(null);
-    const masterRef = useRef<GainNode | null>(null);
-    const ambientStartedRef = useRef(false);
+    const audioRef = useRef<HTMLAudioElement | null>(null);
+    const audioCtxRef = useRef<AudioContext | null>(null);
+    const gainNodeRef = useRef<GainNode | null>(null);
+
     const [muted, setMuted] = useState(false);
     const [started, setStarted] = useState(false);
 
-    const ensureCtx = useCallback(() => {
-        if (!ctxRef.current) {
-            const ctx = new AudioContext();
-            const master = ctx.createGain();
-            master.gain.value = 0.25;
-            master.connect(ctx.destination);
-            ctxRef.current = ctx;
-            masterRef.current = master;
-        }
-        return { ctx: ctxRef.current, master: masterRef.current! };
+    // Inicializamos el elemento de audio que cargará el MP3 en Streaming (no satura RAM)
+    useEffect(() => {
+        // Asumimos que el usuario pondrá su archivo MP3 en la carpeta 'public/' 
+        // con el nombre 'space-ambient.mp3'
+        const audio = new Audio('/space-ambient.mp3');
+        audio.loop = true;
+        audio.preload = 'auto'; // Pre-cargamos para que arranque inmediato
+        audio.volume = 0; // Arrancamos en volumen 0 para hacer un fade-in profesional
+
+        audioRef.current = audio;
+
+        return () => {
+            audio.pause();
+            audio.src = '';
+        };
     }, []);
 
     const startAmbient = useCallback(() => {
-        if (ambientStartedRef.current) return;
-        ambientStartedRef.current = true;
+        if (started || !audioRef.current) return;
 
-        const { ctx, master } = ensureCtx();
+        // Reproducimos el MP3
+        audioRef.current.play().then(() => {
+            // Fade-in suave de volumen usando un interval (estilo cinemático de 3 segundos)
+            let vol = 0;
+            const maxVol = 0.6; // Volumen máximo deseable para que no atruene y nos deje escuchar efectos si ponemos
+            const fadeInterval = setInterval(() => {
+                vol += 0.05;
+                if (vol >= maxVol) {
+                    vol = maxVol;
+                    clearInterval(fadeInterval);
+                }
+                if (audioRef.current) {
+                    audioRef.current.volume = vol;
+                }
+            }, 250);
 
-        // Red de delay para efecto reverb espacial
-        const delay = ctx.createDelay(2);
-        delay.delayTime.value = 0.9;
-        const feedback = ctx.createGain();
-        feedback.gain.value = 0.38;
-        const delayOut = ctx.createGain();
-        delayOut.gain.value = 0.28;
-        delay.connect(feedback);
-        feedback.connect(delay);
-        delay.connect(delayOut);
-        delayOut.connect(master);
+            setStarted(true);
+        }).catch(err => console.log('El navegador bloqueó el autoplay. Ocurrirá interacción requerida:', err));
 
-        // Capas de drone graves
-        const droneFreqs = [27.5, 55, 82.5, 110];
-        droneFreqs.forEach((freq, i) => {
-            const osc = ctx.createOscillator();
-            osc.type = i % 2 === 0 ? 'sine' : 'triangle';
-            osc.frequency.value = freq;
-            osc.detune.value = (Math.random() - 0.5) * 8;
+    }, [started]);
 
-            const gain = ctx.createGain();
-            gain.gain.value = 0;
-
-            // LFO lento para movimiento orgánico
-            const lfo = ctx.createOscillator();
-            lfo.frequency.value = 0.04 + i * 0.015;
-            const lfoGain = ctx.createGain();
-            lfoGain.gain.value = 0.015;
-            lfo.connect(lfoGain);
-            lfoGain.connect(gain.gain);
-
-            osc.connect(gain);
-            gain.connect(master);
-            gain.connect(delay);
-
-            osc.start();
-            lfo.start();
-
-            // Fade in suave
-            gain.gain.setValueAtTime(0, ctx.currentTime);
-            gain.gain.linearRampToValueAtTime(0.06 / (i + 1), ctx.currentTime + 4);
-        });
-
-        // Centelleo agudo muy sutil
-        const shimmer = ctx.createOscillator();
-        shimmer.type = 'sine';
-        shimmer.frequency.value = 1320;
-        const shimmerGain = ctx.createGain();
-        shimmerGain.gain.value = 0;
-        const shimmerLFO = ctx.createOscillator();
-        shimmerLFO.frequency.value = 0.07;
-        const shimmerLFOGain = ctx.createGain();
-        shimmerLFOGain.gain.value = 0.005;
-        shimmerLFO.connect(shimmerLFOGain);
-        shimmerLFOGain.connect(shimmerGain.gain);
-        shimmer.connect(shimmerGain);
-        shimmerGain.connect(master);
-        shimmer.start();
-        shimmerLFO.start();
-        shimmerGain.gain.linearRampToValueAtTime(0.005, ctx.currentTime + 6);
-
-        setStarted(true);
-    }, [ensureCtx]);
-
-    // Sonido al cambiar de planeta — tono suave con fade out largo
+    // Mantenemos la función vacía temporalmente por compatibilidad con App.tsx 
+    // y por si en el futuro queremos añadir un 'ping' (SFX) al saltar de planeta encima del colchón del mp3.
     const playPlanetSound = useCallback((index: number) => {
-        if (!ctxRef.current || !masterRef.current) return;
-        const ctx = ctxRef.current;
-        const master = masterRef.current;
-
-        const base = PLANET_NOTES[index];
-
-        // Dos osciladores armónicos para enriquecer el sonido
-        [[base * 2, 'sine'], [base * 3, 'sine'], [base * 4, 'triangle']].forEach(([freq, type]) => {
-            const osc = ctx.createOscillator();
-            osc.type = type as OscillatorType;
-            osc.frequency.value = freq as number;
-
-            const gain = ctx.createGain();
-            gain.gain.setValueAtTime(0, ctx.currentTime);
-            gain.gain.linearRampToValueAtTime(0.07, ctx.currentTime + 0.04);
-            gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 2.5);
-
-            // Un poco de reverb
-            const noteDelay = ctx.createDelay(1);
-            noteDelay.delayTime.value = 0.3;
-            const noteDelayGain = ctx.createGain();
-            noteDelayGain.gain.value = 0.2;
-            osc.connect(gain);
-            gain.connect(master);
-            gain.connect(noteDelay);
-            noteDelay.connect(noteDelayGain);
-            noteDelayGain.connect(master);
-
-            osc.start();
-            osc.stop(ctx.currentTime + 3);
-        });
+        // En una app de Awwwards, el track envolvente de alta calidad es suficiente, 
+        // pero aquí podríamos disparar sonidos pequeños de interfaz (SFX).
     }, []);
 
     const toggleMute = useCallback(() => {
-        if (!masterRef.current) return;
-        setMuted(prev => {
-            const next = !prev;
-            masterRef.current!.gain.setTargetAtTime(next ? 0 : 0.25, ctxRef.current!.currentTime, 0.3);
-            return next;
-        });
-    }, []);
+        if (!audioRef.current) return;
+
+        const nextMuted = !muted;
+
+        // Logica para hacer Fades en lugar de cortes abruptos de muteo (Premium Feel)
+        let vol = audioRef.current.volume;
+        const targetVol = nextMuted ? 0 : 0.6;
+        const step = nextMuted ? -0.05 : 0.05;
+
+        const fadeInterval = setInterval(() => {
+            vol += step;
+            if ((nextMuted && vol <= 0) || (!nextMuted && vol >= 0.6)) {
+                vol = targetVol;
+                clearInterval(fadeInterval);
+            }
+            if (audioRef.current) {
+                audioRef.current.volume = Math.max(0, Math.min(1, vol));
+            }
+        }, 50);
+
+        setMuted(nextMuted);
+    }, [muted]);
 
     return { startAmbient, playPlanetSound, toggleMute, muted, started };
 }

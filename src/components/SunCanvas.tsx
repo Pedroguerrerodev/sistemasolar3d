@@ -26,20 +26,21 @@ function startRayCanvas(canvas: HTMLCanvasElement, total: number, r: number): ()
     curl: number; // curvatura lateral
   };
 
-  const streamers: Streamer[] = Array.from({ length: 90 }, (_, i) => {
-    const long = i % 7 === 0;
-    const mid  = i % 3 === 0 && !long;
+  const NUM_RAYS = 60;
+  const streamers: Streamer[] = Array.from({ length: NUM_RAYS }, (_, i) => {
+    const long = i % 5 === 0;
+    const mid = i % 2 === 0 && !long;
     const rr = long ? 235 + Math.floor(Math.random() * 20) : 255;
     const gg = long ? 80 + Math.floor(Math.random() * 60) : mid ? 140 + Math.floor(Math.random() * 80) : 200 + Math.floor(Math.random() * 55);
     const bb = long ? 0 : mid ? 10 : 30;
     return {
-      angle: (i / 90) * Math.PI * 2 + Math.random() * 0.08,
+      angle: (i / NUM_RAYS) * Math.PI * 2 + Math.random() * 0.15,
       baseLen: long ? r * 0.9 : mid ? r * 0.4 : r * 0.18,
-      ampLen:  long ? r * 0.55 : mid ? r * 0.22 : r * 0.10,
-      speed:   0.3 + Math.random() * 0.6,
-      phase:   Math.random() * Math.PI * 2,
+      ampLen: long ? r * 0.55 : mid ? r * 0.22 : r * 0.10,
+      speed: 0.3 + Math.random() * 0.6,
+      phase: Math.random() * Math.PI * 2,
       strokeW: long ? 1.2 + Math.random() * 0.8 : mid ? 0.8 + Math.random() * 0.6 : 0.4 + Math.random() * 0.5,
-      blur:    long ? 14 + Math.random() * 8 : mid ? 8 + Math.random() * 6 : 4 + Math.random() * 4,
+      blur: long ? 14 + Math.random() * 8 : mid ? 8 + Math.random() * 6 : 4 + Math.random() * 4,
       r: rr, g: gg, b: bb,
       segments: long ? 12 : mid ? 7 : 4,
       curl: (Math.random() - 0.5) * 0.35,
@@ -64,14 +65,7 @@ function startRayCanvas(canvas: HTMLCanvasElement, total: number, r: number): ()
       const a = s.angle + globalAngle;
       const alpha = 0.35 + 0.4 * pulse;
 
-      ctx.save();
-      ctx.shadowBlur = s.blur;
-      ctx.shadowColor = `rgba(${s.r},${s.g},${s.b},${alpha * 0.9})`;
-      ctx.strokeStyle = `rgba(${s.r},${s.g},${s.b},${alpha})`;
-      ctx.lineWidth = s.strokeW;
-      ctx.lineCap = "round";
-
-      // Dibujar en segmentos curvados (bezier por puntos)
+      // Efecto del resplandor (antes shadowBlur, ahora linea gruesa semi transparente)
       ctx.beginPath();
       let px = cx + Math.cos(a) * r;
       let py = cy + Math.sin(a) * r;
@@ -86,8 +80,20 @@ function startRayCanvas(canvas: HTMLCanvasElement, total: number, r: number): ()
         const nx = cx + Math.cos(a) * dist + Math.cos(perpA) * drift;
         const ny = cy + Math.sin(a) * dist + Math.sin(perpA) * drift;
         ctx.lineTo(nx, ny);
-        px = nx; py = ny;
       }
+
+      ctx.save();
+      ctx.strokeStyle = `rgba(${s.r},${s.g},${s.b},${alpha * 0.4})`;
+      ctx.lineWidth = s.strokeW * 4;
+      ctx.lineCap = "round";
+      ctx.stroke();
+      ctx.restore();
+
+      // Línea central
+      ctx.save();
+      ctx.strokeStyle = `rgba(${s.r},${s.g},${s.b},${alpha})`;
+      ctx.lineWidth = s.strokeW;
+      ctx.lineCap = "round";
       ctx.stroke();
       ctx.restore();
     }
@@ -95,9 +101,9 @@ function startRayCanvas(canvas: HTMLCanvasElement, total: number, r: number): ()
     // Segundo pase: resplandor corona difuso
     ctx.globalCompositeOperation = "source-over";
     const halo = ctx.createRadialGradient(cx, cy, r * 0.85, cx, cy, r * 1.9);
-    halo.addColorStop(0,   "rgba(255,160,30,0.18)");
-    halo.addColorStop(0.45,"rgba(255,80,0,0.07)");
-    halo.addColorStop(1,   "rgba(0,0,0,0)");
+    halo.addColorStop(0, "rgba(255,160,30,0.18)");
+    halo.addColorStop(0.45, "rgba(255,80,0,0.07)");
+    halo.addColorStop(1, "rgba(0,0,0,0)");
     ctx.beginPath();
     ctx.arc(cx, cy, r * 1.9, 0, Math.PI * 2);
     ctx.fillStyle = halo;
@@ -110,34 +116,34 @@ function startRayCanvas(canvas: HTMLCanvasElement, total: number, r: number): ()
 
 export default function SunCanvas({ size = 260 }: Props) {
   const mountRef = useRef<HTMLDivElement>(null);
-  const rayRef   = useRef<HTMLCanvasElement>(null);
+  const rayRef = useRef<HTMLCanvasElement>(null);
 
   // El canvas de rayos es 1.7x el diametro de la esfera
-  const total  = Math.round(size * 1.7);
+  const total = Math.round(size * 1.7);
   const offset = (total - size) / 2;
   const radius = size / 2;
 
   useEffect(() => {
     const rayCanvas = rayRef.current!;
-    rayCanvas.width  = total;
+    rayCanvas.width = total;
     rayCanvas.height = total;
     const stopRays = startRayCanvas(rayCanvas, total, radius);
 
     const mount = mountRef.current!;
-    const scene  = new THREE.Scene();
+    const scene = new THREE.Scene();
     const camera = new THREE.PerspectiveCamera(30, 1, 0.1, 100);
     camera.position.z = 4.2;
 
-    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+    const renderer = new THREE.WebGLRenderer({ antialias: false, alpha: true });
     renderer.setSize(size, size);
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
     renderer.setClearColor(0x000000, 0);
     renderer.toneMapping = THREE.NoToneMapping;
     mount.appendChild(renderer.domElement);
 
-    const geo = new THREE.SphereGeometry(1, 128, 64);
+    const geo = new THREE.SphereGeometry(1, 32, 32);
     const mat = new THREE.MeshBasicMaterial({ color: "#ff9922" });
-    const sun  = new THREE.Mesh(geo, mat);
+    const sun = new THREE.Mesh(geo, mat);
     scene.add(sun);
 
     const loader = new THREE.TextureLoader();
@@ -172,9 +178,9 @@ export default function SunCanvas({ size = 260 }: Props) {
         ref={rayRef}
         style={{
           position: "absolute",
-          top:  -offset,
+          top: -offset,
           left: -offset,
-          width:  total,
+          width: total,
           height: total,
           pointerEvents: "none",
           zIndex: 0,
@@ -193,8 +199,7 @@ export default function SunCanvas({ size = 260 }: Props) {
           overflow: "hidden",
           boxShadow: `
             0 0 ${size * 0.10}px ${size * 0.04}px rgba(255,210,80,1),
-            0 0 ${size * 0.22}px ${size * 0.06}px rgba(255,140,0,0.75),
-            0 0 ${size * 0.40}px ${size * 0.10}px rgba(255,60,0,0.40)
+            0 0 ${size * 0.22}px ${size * 0.06}px rgba(255,140,0,0.75)
           `,
         }}
       />
