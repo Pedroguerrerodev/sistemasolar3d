@@ -1,9 +1,5 @@
 ﻿import { useEffect, useRef } from 'react';
 import * as THREE from 'three';
-import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
-import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
-import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
-import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
 import gsap from 'gsap';
 
 const PLANETS = [
@@ -172,29 +168,6 @@ export default function PlanetScene({ activeIndex, onPlanetChange, planetsData }
     renderer.shadowMap.type = THREE.PCFSoftShadowMap;
     container.appendChild(renderer.domElement);
     rendererRef.current = renderer;
-
-    // Post-processing setup
-    const renderScene = new RenderPass(scene, camera);
-    const renderTarget = new THREE.WebGLRenderTarget(window.innerWidth, window.innerHeight, {
-      type: THREE.HalfFloatType,
-      format: THREE.RGBAFormat,
-      colorSpace: THREE.SRGBColorSpace,
-    });
-    const composer = new EffectComposer(renderer, renderTarget);
-    composer.addPass(renderScene);
-
-    // Bloom Pass to make the rim lights and atmospheres glow
-    const bloomPass = new UnrealBloomPass(
-      new THREE.Vector2(window.innerWidth, window.innerHeight),
-      0.35,   // strength (bajado de 0.6 para que no queme la imagen)
-      0.5,    // radius
-      0.85    // threshold (subido de 0.1 para que SOLO lo ultra-brillante haga Bloom)
-    );
-    composer.addPass(bloomPass);
-
-    // Output Pass needed for sRGB color mapping in newer Three.js versions with composer
-    const outputPass = new OutputPass();
-    composer.addPass(outputPass);
 
     // Lighting
     const ambientLight = new THREE.AmbientLight(0xffffff, 0.05);
@@ -798,7 +771,7 @@ export default function PlanetScene({ activeIndex, onPlanetChange, planetsData }
 
       camera.lookAt(lookAtTargetRef.current);
 
-      composer.render();
+      renderer.render(scene, camera);
       animationFrameId = requestAnimationFrame(render);
     };
     render();
@@ -815,7 +788,6 @@ export default function PlanetScene({ activeIndex, onPlanetChange, planetsData }
       camera.updateProjectionMatrix();
 
       renderer.setSize(width, height);
-      composer.setSize(width, height);
     };
     window.addEventListener('resize', handleResize);
     handleResize(); // Call once to set initial size correctly
