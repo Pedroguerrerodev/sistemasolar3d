@@ -176,9 +176,11 @@ export default function App() {
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [showPanel, setShowPanel] = useState(false);
   const [weightKg, setWeightKg] = useState('');
-  const { startAmbient, playPlanetSound, playHyperspaceTransition, playReturnTransition, toggleMute, muted, started } = useSpaceAudio();
+  const { startAmbient, playPlanetSound, playHyperspaceTransition, playReturnTransition, toggleMute, muted, started, playWarningBeep, playSwallowBoom } = useSpaceAudio();
 
   const [hyperJumping, setHyperJumping] = useState(false);
+  const [blackHoleWarningTimer, setBlackHoleWarningTimer] = useState<number | null>(null);
+  const [isSwallowed, setIsSwallowed] = useState(false);
 
   const handlePreloaderComplete = useCallback(() => {
     setShowPreloader(false);
@@ -205,6 +207,31 @@ export default function App() {
     const timer = setTimeout(() => setIsTransitioning(false), 2200);
     return () => clearTimeout(timer);
   }, [activeIndex, started, playPlanetSound]);
+
+  // Manejo de la cuenta atrás del agujero negro
+  useEffect(() => {
+    let timerId: ReturnType<typeof setInterval>;
+    if (activeIndex === 0 && !isSwallowed && !showIntro && !showPreloader) {
+      setBlackHoleWarningTimer(20); // 20 segundos de cuenta atrás
+      timerId = setInterval(() => {
+        setBlackHoleWarningTimer(prev => {
+          if (prev && prev > 1) {
+            playWarningBeep(); // Beep on every count down second
+          }
+          if (prev && prev <= 1) {
+            clearInterval(timerId);
+            playSwallowBoom(); // El boom
+            setIsSwallowed(true); // Trigger de la animación
+            return 0;
+          }
+          return prev ? prev - 1 : null;
+        });
+      }, 1000);
+    } else {
+      setBlackHoleWarningTimer(null);
+    }
+    return () => clearInterval(timerId);
+  }, [activeIndex, isSwallowed, showIntro, showPreloader, playWarningBeep, playSwallowBoom]);
 
   // Navegación principal (Teclado, Rueda y Swipe)
   const navigatePlanet = useCallback((direction: 'next' | 'prev') => {
@@ -347,9 +374,6 @@ export default function App() {
         <h1 className="text-[10px] md:text-sm font-light text-gray-200 uppercase">
           <SplitTextReveal text="Explorador Solar" delay={showIntro ? 0 : 2.2} />
         </h1>
-        <p className="text-[8px] md:text-[10px] text-[#e89c51] mt-1 md:mt-2 uppercase">
-          <SplitTextReveal text="Solo con Three.js" delay={showIntro ? 0 : 2.4} />
-        </p>
       </motion.div>
 
       {/* Hint teclado + botón mute */}
@@ -389,7 +413,7 @@ export default function App() {
         <div
           className="absolute top-[14%] md:top-[18%] left-1/2 -translate-x-1/2 text-center tracking-[0.2em] z-20 cursor-pointer opacity-60 hover:opacity-100 transition-opacity pl-[0.2em]"
           onClick={() => {
-            if (activeIndex !== 3) handleFirstInteraction(activeIndex - 1);
+            if (activeIndex !== 3) navigatePlanet('prev');
           }}
         >
           <AnimatePresence mode="wait">
@@ -692,6 +716,102 @@ export default function App() {
               </div>
             </motion.div>
           </>
+        )}
+      </AnimatePresence>
+
+      {/* Alerta del Agujero Negro */}
+      <AnimatePresence>
+        {blackHoleWarningTimer !== null && !isSwallowed && (
+          <motion.div
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0 }}
+            className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50 flex flex-col items-center justify-center pointer-events-none w-full max-w-lg"
+          >
+            <div className="text-red-500 font-mono text-2xl md:text-3xl tracking-[0.3em] text-center animate-pulse drop-shadow-[0_0_15px_rgba(239,68,68,0.8)] px-4">
+              ⚠ ALERTA CRÍTICA ⚠
+            </div>
+            <div className="mt-4 bg-red-950/40 border border-red-500/50 backdrop-blur-md px-8 py-4 rounded-lg text-red-200 text-center uppercase tracking-widest text-[9px] md:text-[10px] mx-4">
+              Aproximación al horizonte de sucesos
+              <br />
+              <span className="opacity-70 mt-3 block">Punto de no retorno en:</span>
+              <span className="text-white text-3xl font-mono block mt-2 animate-pulse">{blackHoleWarningTimer}</span>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Pantalla y animación cuando somos tragados */}
+      <AnimatePresence>
+        {isSwallowed && (
+          <motion.div
+            className="absolute inset-0 z-[200] flex flex-col items-center justify-center pointer-events-auto overflow-hidden bg-transparent"
+          >
+            {/* Círculo expansivo negro puro (el tragado) */}
+            <motion.div
+              initial={{ scale: 0 }}
+              animate={{ scale: 200 }}
+              transition={{ duration: 2, ease: "easeIn" }}
+              className="absolute bg-black rounded-full w-20 h-20 z-0 origin-center"
+            />
+
+            {/* Background container para asegurar el 100% de oscuridad una vez cubrimos */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 1.8, duration: 0.2 }}
+              className="absolute inset-0 bg-black z-[-1]"
+            />
+
+            {/* Modal de Game Over espacial */}
+            <div className="relative z-10 max-w-3xl px-6 text-center flex flex-col items-center justify-center h-full gap-8">
+              <motion.h1
+                initial={{ opacity: 0, y: 30 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 2.5, duration: 1 }}
+                className="text-2xl md:text-6xl text-red-600 font-light tracking-[0.2em] md:tracking-[0.4em] w-full break-words px-2"
+              >
+                ESPAGUETIZACIÓN
+              </motion.h1>
+
+              <motion.p
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 3.5, duration: 1 }}
+                className="text-gray-400 tracking-[0.2em] leading-[2.5] text-[9px] md:text-xs px-4 md:px-12 uppercase border-l border-r border-[#e89c51]/30 py-4"
+              >
+                La inmensa gravedad de Sagitario A* ha superado los motores de tu nave.
+                Has cruzado el Horizonte de Sucesos.
+                <br /><br />
+                Toda la materia a bordo ha sido desgarrada por la singularidad cuántica en un proceso de espaguetización irreversible.
+              </motion.p>
+
+              <motion.p
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 6.5, duration: 2 }}
+                className="text-gray-500 font-serif italic tracking-[0.1em] leading-loose text-xs md:text-sm px-6 max-w-2xl mt-2"
+              >
+                "En el vasto silencio estelar, cada día se estima que incontables soles y mundos enteros son finalmente engullidos y borrados de la existencia por la incomprensible danza de la gravedad pura.<br />Hoy, formas parte del infinito enigma."
+              </motion.p>
+
+              <motion.button
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 8.5, duration: 1 }}
+                onClick={() => {
+                  setIsSwallowed(false);
+                  setBlackHoleWarningTimer(null);
+                  playReturnTransition();
+                  setActiveIndex(PLANETS_ALL.length - 1);
+                  setShowIntro(true);
+                }}
+                className="mt-8 border border-white/20 bg-white/5 hover:bg-white hover:text-black transition-all duration-500 px-10 py-5 tracking-[0.3em] text-white uppercase text-[10px] w-auto shadow-lg hover:shadow-white/20"
+              >
+                VOLVER A INICIO
+              </motion.button>
+            </div>
+          </motion.div>
         )}
       </AnimatePresence>
     </div>

@@ -230,5 +230,82 @@ export function useSpaceAudio() {
         setMuted(nextMuted);
     }, [muted]);
 
-    return { startAmbient, playPlanetSound, playHyperspaceTransition, playReturnTransition, toggleMute, muted, started };
+    // SFX para el Agujero Negro
+    const playWarningBeep = useCallback(() => {
+        if (muted || !audioCtxRef.current) {
+            const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;
+            audioCtxRef.current = new AudioContextClass();
+        }
+
+        const ctx = audioCtxRef.current;
+        if (!ctx || muted) return;
+        if (ctx.state === 'suspended') ctx.resume();
+
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(800, ctx.currentTime);
+
+        gain.gain.setValueAtTime(0, ctx.currentTime);
+        gain.gain.linearRampToValueAtTime(0.3, ctx.currentTime + 0.05);
+        gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.3);
+
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+
+        osc.start(ctx.currentTime);
+        osc.stop(ctx.currentTime + 0.3);
+    }, [muted]);
+
+    const playSwallowBoom = useCallback(() => {
+        if (muted) return;
+        if (!audioCtxRef.current) {
+            const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;
+            audioCtxRef.current = new AudioContextClass();
+        }
+
+        const ctx = audioCtxRef.current;
+        if (!ctx) return;
+        if (ctx.state === 'suspended') ctx.resume();
+
+        // Massive deep explosion using oscillator + noise
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(100, ctx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(10, ctx.currentTime + 2);
+
+        gain.gain.setValueAtTime(0, ctx.currentTime);
+        gain.gain.linearRampToValueAtTime(1, ctx.currentTime + 0.1);
+        gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 3);
+
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+
+        osc.start(ctx.currentTime);
+        osc.stop(ctx.currentTime + 3);
+
+        // Stop the ambient music completely after swallowed 
+        if (audioRef.current) {
+            let vol = audioRef.current.volume;
+            const fadeOut = setInterval(() => {
+                vol -= 0.1;
+                if (vol <= 0) {
+                    vol = 0;
+                    clearInterval(fadeOut);
+                    if (audioRef.current) {
+                        audioRef.current.pause();
+                        audioRef.current.src = '';
+                    }
+                }
+                if (audioRef.current && !muted) {
+                    audioRef.current.volume = Math.max(0, vol);
+                }
+            }, 50);
+        }
+    }, [muted]);
+
+    return { startAmbient, playPlanetSound, playHyperspaceTransition, playReturnTransition, toggleMute, muted, started, playWarningBeep, playSwallowBoom };
 }

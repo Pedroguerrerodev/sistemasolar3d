@@ -50,10 +50,14 @@ export default function SolarIntro({ onComplete }: Props) {
         <SunCanvas size={220} />
       </div>
 
-      <div ref={contentRef} className="relative z-20 mt-10 text-center px-6">
+      <div ref={contentRef} className="relative z-20 mt-10 text-center px-6 max-w-2xl">
         <p className="text-[10px] tracking-[0.45em] text-[#e89c51] mb-2 pl-[0.45em]">EXPLORADOR</p>
-        <h1 className="text-4xl md:text-6xl tracking-[0.45em] text-white font-thin mb-2 pl-[0.45em]">SOLAR</h1>
-        <p className="text-[9px] md:text-[10px] tracking-[0.3em] text-gray-500 mb-10 pl-[0.3em]">NUESTRO SISTEMA SOLAR EN THREE.JS</p>
+        <h1 className="text-4xl md:text-6xl tracking-[0.45em] text-white font-thin mb-10 pl-[0.45em]">SOLAR</h1>
+
+        <p className="text-[9px] md:text-[10px] leading-[2.5] tracking-[0.25em] text-gray-300 mb-10 px-2 md:px-12 uppercase italic font-light">
+          Tu misión es explorar el espacio más allá de nuestro sistema solar.<br />
+          <span className="text-red-400/90 font-medium tracking-[0.3em] not-italic mt-2 block">Ten cuidado con el agujero negro.</span>
+        </p>
 
         <button
           onClick={handleStart}
