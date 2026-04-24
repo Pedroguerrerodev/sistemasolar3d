@@ -235,7 +235,7 @@ export default function PlanetScene({ activeIndex, onPlanetChange, planetsData }
       const zPos = getZPos(i, SCENE_PLANETS);
       const radius = p.radius || 30;
 
-      const geometry = new THREE.SphereGeometry(radius, 128, 128);
+      let geometry: THREE.SphereGeometry | THREE.BufferGeometry = new THREE.SphereGeometry(radius, 128, 128);
 
       // Try to load texture, fallback to procedural
       let texture;
@@ -254,7 +254,9 @@ export default function PlanetScene({ activeIndex, onPlanetChange, planetsData }
       let material;
 
       if (p.id === 'blackhole') {
-        material = new THREE.MeshBasicMaterial({ color: 0x000000 });
+        // Hitbox invisible, mucho más grande para facilitar el clic en la bola y disco
+        geometry = new THREE.SphereGeometry(radius * 4.5, 32, 32);
+        material = new THREE.MeshBasicMaterial({ transparent: true, opacity: 0, depthWrite: false, side: THREE.DoubleSide });
       } else {
         material = new THREE.MeshStandardMaterial({
           map: texture,
@@ -270,6 +272,12 @@ export default function PlanetScene({ activeIndex, onPlanetChange, planetsData }
       mesh.userData = { isBlackHole: p.id === 'blackhole' };
 
       if (p.id === 'blackhole') {
+        // Esfera negra visual
+        const visualGeom = new THREE.SphereGeometry(radius, 128, 128);
+        const visualMat = new THREE.MeshBasicMaterial({ color: 0x000000 });
+        const visualMesh = new THREE.Mesh(visualGeom, visualMat);
+        mesh.add(visualMesh);
+
         const innerRadius = radius * 1.1;
         const outerRadius = radius * 5.5;
 
@@ -377,7 +385,10 @@ export default function PlanetScene({ activeIndex, onPlanetChange, planetsData }
         // Evitamos que vibre o parpadee pegándolo atrás
         mesh.add(corona);
 
-        // Evitamos que emita sombras
+        // Evitamos que emita sombras en la bounding box o sus hijos
+        mesh.castShadow = false;
+        mesh.receiveShadow = false;
+      } else {
         mesh.castShadow = true;
         mesh.receiveShadow = true;
       }
@@ -654,7 +665,8 @@ export default function PlanetScene({ activeIndex, onPlanetChange, planetsData }
 
         // Animación específica del Anillo de Acreción interno
         if (p.userData.isBlackHole) {
-          const disk = p.children[0]; // El primer child que añadimos fue el accretionDisk
+          // children[0] es la esfera negra, children[1] es el disco (accretionDisk)
+          const disk = p.children[1];
           if (disk) disk.rotation.y -= 0.003;
         }
 
@@ -733,8 +745,22 @@ export default function PlanetScene({ activeIndex, onPlanetChange, planetsData }
 
       // Dispose geometries and materials
       planetsRef.current.forEach(p => {
-        p.geometry.dispose();
-        (p.material as THREE.Material).dispose();
+        if (p.geometry) p.geometry.dispose();
+        if (p.material) (p.material as THREE.Material).dispose();
+
+        if (p.userData.isBlackHole) {
+          p.children.forEach(c => {
+            const childMesh = c as THREE.Mesh;
+            if (childMesh.geometry) childMesh.geometry.dispose();
+            if (childMesh.material) {
+              if (Array.isArray(childMesh.material)) {
+                childMesh.material.forEach(m => m.dispose());
+              } else {
+                childMesh.material.dispose();
+              }
+            }
+          });
+        }
       });
       atmospheresRef.current.forEach(a => {
         if (a) {

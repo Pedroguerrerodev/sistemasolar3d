@@ -29,47 +29,47 @@ const SplitTextReveal = ({ text, delay = 0, style }: { text: string, delay?: num
 
 const PLANETS = [
   {
-    id: 'pluto', name: 'PLUTÓN', distance: '39,5 UA', distanceKm: '5.906 M km', color: '#8B7355',
+    id: 'pluto', name: 'PLUTÓN', distance: '5,4 HORAS LUZ', distanceKm: '5.906 M km', color: '#8B7355',
     description: 'UNA VEZ CONSIDERADO EL NOVENO PLANETA, PLUTÓN ES UN PLANETA ENANO EN EL CINTURÓN DE KUIPER. TIENE UNA SUPERFICIE COMPLEJA CON MONTAÑAS DE HIELO DE AGUA.',
     gravity: 0.063, temp: '-230 °C', moons: 5, diameter: '2.377 km',
   },
   {
-    id: 'neptune', name: 'NEPTUNO', distance: '30,06 UA', distanceKm: '4.495 M km', color: '#274687',
+    id: 'neptune', name: 'NEPTUNO', distance: '4,1 HORAS LUZ', distanceKm: '4.495 M km', color: '#274687',
     description: 'OSCURO, FRÍO Y AZOTADO POR VIENTOS SUPERSÓNICOS, EL GIGANTE DE HIELO NEPTUNO ES EL OCTAVO Y MÁS DISTANTE PLANETA DE NUESTRO SISTEMA SOLAR.',
     gravity: 1.14, temp: '-201 °C', moons: 16, diameter: '49.528 km',
   },
   {
-    id: 'uranus', name: 'URANO', distance: '19,18 UA', distanceKm: '2.871 M km', color: '#82b3d1',
+    id: 'uranus', name: 'URANO', distance: '2,6 HORAS LUZ', distanceKm: '2.871 M km', color: '#82b3d1',
     description: 'URANO ES EL SÉPTIMO PLANETA DESDE EL SOL. TIENE EL TERCER RADIO PLANETARIO MÁS GRANDE Y LA CUARTA MASA PLANETARIA MÁS GRANDE.',
     gravity: 0.89, temp: '-197 °C', moons: 28, diameter: '51.118 km',
   },
   {
-    id: 'saturn', name: 'SATURNO', distance: '9,539 UA', distanceKm: '1.429 M km', color: '#e3cb8f',
+    id: 'saturn', name: 'SATURNO', distance: '1,3 HORAS LUZ', distanceKm: '1.429 M km', color: '#e3cb8f',
     description: 'ADORNADO CON UN DESLUMBRANTE Y COMPLEJO SISTEMA DE ANILLOS DE HIELO, SATURNO ES ÚNICO EN NUESTRO SISTEMA SOLAR. ES EL SEGUNDO PLANETA MÁS GRANDE.',
     gravity: 1.07, temp: '-178 °C', moons: 146, diameter: '116.460 km',
   },
   {
-    id: 'jupiter', name: 'JÚPITER', distance: '5,203 UA', distanceKm: '778,6 M km', color: '#c99b75',
+    id: 'jupiter', name: 'JÚPITER', distance: '43 MINUTOS LUZ', distanceKm: '778,6 M km', color: '#c99b75',
     description: 'JÚPITER ES MÁS DEL DOBLE DE MASIVO QUE EL RESTO DE LOS PLANETAS DE NUESTRO SISTEMA SOLAR COMBINADOS. LA GRAN MANCHA ROJA ES UNA TORMENTA DE SIGLOS DE ANTIGÜEDAD.',
     gravity: 2.53, temp: '-145 °C', moons: 95, diameter: '139.820 km',
   },
   {
-    id: 'mars', name: 'MARTE', distance: '1,524 UA', distanceKm: '227,9 M km', color: '#c1440e',
+    id: 'mars', name: 'MARTE', distance: '12,6 MINUTOS LUZ', distanceKm: '227,9 M km', color: '#c1440e',
     description: 'MARTE ES UN MUNDO POLVORIENTO, FRÍO Y DESÉRTICO CON UNA ATMÓSFERA MUY DELGADA. HAY EVIDENCIA SÓLIDA DE QUE MARTE FUE, HACE MILES DE MILLONES DE AÑOS, MÁS HÚMEDO Y CÁLIDO.',
     gravity: 0.38, temp: '-65 °C', moons: 2, diameter: '6.779 km',
   },
   {
-    id: 'earth', name: 'TIERRA', distance: '1,00 UA', distanceKm: '149,6 M km', color: '#4b759e',
+    id: 'earth', name: 'TIERRA', distance: '8,3 MINUTOS LUZ', distanceKm: '149,6 M km', color: '#4b759e',
     description: 'NUESTRO PLANETA ES EL ÚNICO LUGAR QUE CONOCEMOS HABITADO POR SERES VIVOS. TAMBIÉN ES EL ÚNICO PLANETA EN NUESTRO SISTEMA SOLAR CON AGUA LÍQUIDA EN LA SUPERFICIE.',
     gravity: 1.0, temp: '15 °C', moons: 1, diameter: '12.742 km',
   },
   {
-    id: 'venus', name: 'VENUS', distance: '0,723 UA', distanceKm: '108,2 M km', color: '#e89c51',
+    id: 'venus', name: 'VENUS', distance: '6 MINUTOS LUZ', distanceKm: '108,2 M km', color: '#e89c51',
     description: 'NOMBRADO POR LA DIOSA ROMANA DEL AMOR Y LA BELLEZA. EN LA ANTIGÜEDAD, VENUS ERA CONSIDERADO A MENUDO DOS ESTRELLAS DISTINTAS: LA ESTRELLA VESPERTINA Y LA MATUTINA.',
     gravity: 0.904, temp: '465 °C', moons: 0, diameter: '12.104 km',
   },
   {
-    id: 'mercury', name: 'MERCURIO', distance: '0,39 UA', distanceKm: '57,9 M km', color: '#888888',
+    id: 'mercury', name: 'MERCURIO', distance: '3,2 MINUTOS LUZ', distanceKm: '57,9 M km', color: '#888888',
     description: 'EL PLANETA MÁS PEQUEÑO DE NUESTRO SISTEMA SOLAR Y EL MÁS CERCANO AL SOL, MERCURIO ES SOLO LIGERAMENTE MÁS GRANDE QUE LA LUNA DE LA TIERRA.',
     gravity: 0.38, temp: '167 °C', moons: 0, diameter: '4.879 km',
   },
@@ -176,7 +176,7 @@ export default function App() {
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [showPanel, setShowPanel] = useState(false);
   const [weightKg, setWeightKg] = useState('');
-  const { startAmbient, playPlanetSound, toggleMute, muted, started } = useSpaceAudio();
+  const { startAmbient, playPlanetSound, playHyperspaceTransition, playReturnTransition, toggleMute, muted, started } = useSpaceAudio();
 
   const [hyperJumping, setHyperJumping] = useState(false);
 
@@ -194,15 +194,17 @@ export default function App() {
   const handleFirstInteraction = useCallback((index: number) => {
     startAmbient();
     setActiveIndex(index);
-    playPlanetSound(index);
-  }, [startAmbient, playPlanetSound]);
+  }, [startAmbient]);
 
   useEffect(() => {
     setIsTransitioning(true);
     setShowPanel(false);
+    if (started) {
+      playPlanetSound(activeIndex);
+    }
     const timer = setTimeout(() => setIsTransitioning(false), 2200);
     return () => clearTimeout(timer);
-  }, [activeIndex]);
+  }, [activeIndex, started, playPlanetSound]);
 
   // Navegación principal (Teclado, Rueda y Swipe)
   const navigatePlanet = useCallback((direction: 'next' | 'prev') => {
@@ -212,6 +214,9 @@ export default function App() {
       setActiveIndex(prev => {
         if (prev < PLANETS_ALL.length - 1) {
           startAmbient();
+          if (prev === 2) {
+            playReturnTransition(); // Regresar música al sistema solar
+          }
           return prev + 1;
         }
         return prev;
@@ -229,20 +234,21 @@ export default function App() {
         return prev;
       });
     }
-  }, [isTransitioning, startAmbient, hyperJumping]);
+  }, [isTransitioning, startAmbient, hyperJumping, playReturnTransition]);
 
   const triggerHyperspace = () => {
     if (activeIndex !== 3) return; // Solo desde Plutón
     setHyperJumping(true);
     startAmbient(); // Asegurar sonido
+    playHyperspaceTransition(); // Iniciar transición hiperespacial y cambio de música
 
-    // Hyperjump sequence
+    // Hyperjump sequence y transición de canción duran 3 segundos
     setTimeout(() => {
-      setActiveIndex(2); // Jump to Kepler
-    }, 2000); // 2 second buildup before jump
+      setActiveIndex(2); // Jump to Kepler / Espacio profundo
+    }, 2800); // Casi al final del efecto de sonido
 
     setTimeout(() => {
-      setHyperJumping(false); // Clear effect after 4s
+      setHyperJumping(false); // Clear visual effect
     }, 4000);
   };
 
@@ -316,7 +322,7 @@ export default function App() {
   if (!activePlanet) return null; // Avoid crashing the whole app
 
   return (
-    <div className="relative w-full h-screen overflow-hidden bg-black text-white font-sans selection:bg-orange-500/30 select-none" style={{ cursor: 'none' }}>
+    <div className="relative w-full h-[100dvh] overflow-hidden bg-black text-white font-sans selection:bg-orange-500/30 select-none touch-none" style={{ cursor: 'none' }}>
       <StarCursor />
 
       <AnimatePresence>
@@ -396,6 +402,7 @@ export default function App() {
             >
               <p className="text-[8px] text-gray-400 mb-1">DESTINO</p>
               <h2 className="text-xs text-gray-200 uppercase">{PLANETS_ALL[activeIndex - 1].name}</h2>
+              <p className="text-[6.5px] text-[#e89c51] mt-1 tracking-[0.3em] uppercase">DISTANCIA: {PLANETS_ALL[activeIndex - 1].distance}</p>
             </motion.div>
           </AnimatePresence>
         </div>
@@ -434,6 +441,9 @@ export default function App() {
                 onClick={() => {
                   if (isTransitioning) return;
                   startAmbient();
+                  if (activeIndex < 3 && idx >= 3) {
+                    playReturnTransition();
+                  }
                   setActiveIndex(idx);
                 }}
                 className="relative z-10 flex items-center justify-center w-6 h-6 group cursor-pointer"
@@ -467,7 +477,7 @@ export default function App() {
       </motion.div>
 
       {/* Bottom Content (Active Planet Info) */}
-      <div className="absolute bottom-8 md:bottom-16 left-1/2 -translate-x-1/2 text-center z-10 w-full max-w-2xl px-4 md:px-6 pointer-events-none">
+      <div className="absolute bottom-4 md:bottom-16 left-1/2 -translate-x-1/2 text-center z-10 w-full max-w-[100vw] md:max-w-none px-4 md:px-6 pointer-events-none max-h-[45dvh] md:max-h-none flex flex-col justify-end">
         <AnimatePresence mode="wait">
           <motion.div
             key={`info-${activeIndex}`}
@@ -475,11 +485,13 @@ export default function App() {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
             transition={{ duration: 0.8, ease: "easeInOut", delay: 0.2 }}
+            className="flex flex-col items-center pointer-events-auto overflow-y-auto overflow-x-hidden md:overflow-x-visible touch-pan-y"
+            style={{ maxHeight: '100%' }}
           >
-            <p className="text-[8px] md:text-[10px] tracking-[0.3em] text-[#e89c51] mb-1 md:mb-2 pl-[0.3em] overflow-hidden">
+            <p className="text-[8px] md:text-[10px] tracking-[0.3em] text-[#e89c51] mb-1 md:mb-2 pl-[0.3em] overflow-hidden shrink-0">
               <SplitTextReveal text={activePlanet.id === 'blackhole' ? "AGUJERO NEGRO" : (activeIndex < 3 ? "EXOPLANETA" : "PLANETA")} delay={0.1} />
             </p>
-            <h2 className="text-4xl md:text-6xl md:text-[8rem] tracking-[0.2em] font-sans font-thin text-white mix-blend-overlay mb-4 md:mb-6 pl-[0.2em] opacity-80 uppercase leading-none">
+            <h2 className="text-4xl md:text-6xl md:text-[8rem] tracking-[0.2em] font-sans font-thin text-white mix-blend-overlay mb-4 md:mb-6 pl-[0.2em] opacity-80 uppercase leading-none shrink-0" style={{ whiteSpace: 'nowrap' }}>
               <SplitTextReveal text={activePlanet.name} delay={0.2} style={{ letterSpacing: '0.2em' }} />
             </h2>
 
@@ -487,7 +499,7 @@ export default function App() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.6, duration: 1 }}
-              className="text-[10px] md:text-xs leading-loose tracking-[0.2em] text-gray-300 max-w-xl mx-auto mb-6 md:mb-8 pl-[0.2em] uppercase"
+              className="text-[10px] md:text-xs leading-loose tracking-[0.2em] text-gray-300 max-w-xl mx-auto mb-4 md:mb-8 pl-[0.2em] uppercase shrink-0"
             >
               {activePlanet.description}
             </motion.p>
@@ -496,21 +508,21 @@ export default function App() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.8, duration: 1 }}
-              className="flex justify-center gap-4 md:gap-8"
+              className="flex justify-center gap-4 md:gap-8 shrink-0 pb-6 md:pb-8 pt-4 w-full"
             >
               <button
                 onClick={() => setShowPanel(true)}
-                className="pointer-events-auto text-[8px] md:text-[10px] tracking-[0.3em] text-[#e89c51] uppercase border-b border-[#e89c51] pb-1 hover:text-white hover:border-white transition-colors pl-[0.3em]"
+                className="pointer-events-auto text-[8px] md:text-[10px] tracking-[0.3em] uppercase bg-black/40 backdrop-blur-md text-[#e89c51] border border-[#e89c51]/30 px-6 py-3 md:px-8 md:py-4 rounded-full hover:bg-white/10 hover:text-white hover:border-white/50 transition-all duration-500 shadow-lg shadow-black/50"
               >
-                LEER MÁS
+                <SplitTextReveal text="LEER MÁS" delay={0.9} />
               </button>
 
               {activePlanet.id === 'pluto' && (
                 <button
                   onClick={triggerHyperspace}
-                  className="pointer-events-auto text-[8px] md:text-[10px] tracking-[0.3em] text-cyan-400 uppercase border-b border-cyan-400 pb-1 hover:text-white hover:border-white transition-colors pl-[0.3em] ml-6 opacity-80 mix-blend-screen"
+                  className="pointer-events-auto text-[8px] md:text-[10px] tracking-[0.3em] text-cyan-400 uppercase bg-black/40 backdrop-blur-md shadow-lg shadow-black/50 border border-cyan-400/30 px-6 py-3 md:px-8 md:py-4 rounded-full hover:bg-cyan-500/10 hover:text-white hover:border-cyan-400/80 transition-all duration-500 opacity-90"
                 >
-                  IR MÁS ALLÁ DEL SISTEMA SOLAR
+                  <SplitTextReveal text="IR MÁS ALLÁ DEL SISTEMA SOLAR" delay={0.9} />
                 </button>
               )}
             </motion.div>

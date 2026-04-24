@@ -60,8 +60,23 @@ export default function SolarIntro({ onComplete }: Props) {
           className="group relative px-12 py-3 border border-[#e89c51]/70 text-[#e89c51] text-[10px] tracking-[0.45em] overflow-hidden hover:text-black transition-colors"
         >
           <span className="absolute inset-0 bg-[#e89c51] scale-x-0 group-hover:scale-x-100 origin-left transition-transform duration-300" />
-          <span className="relative">COMENZAR</span>
+          <span className="relative">COMENZAR VIAJE ESPACIAL 🚀</span>
         </button>
+      </div>
+
+      {/* Créditos del creador */}
+      <div className="absolute bottom-8 left-0 w-full text-center z-20">
+        <p className="text-[8px] md:text-[10px] tracking-[0.2em] text-gray-500 uppercase">
+          Desarrollado por{' '}
+          <a
+            href="https://portfoliominimal-nu.vercel.app/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-[#e89c51] hover:text-white transition-colors border-b border-[#e89c51]/30 hover:border-white"
+          >
+            Pedro Guerrero Pinta
+          </a>
+        </p>
       </div>
     </div>
   );
