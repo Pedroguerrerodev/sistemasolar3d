@@ -288,9 +288,10 @@ export default function PlanetScene({ activeIndex, onPlanetChange, planetsData }
         const positions = new Float32Array(particleCount * 3);
         const colors = new Float32Array(particleCount * 3);
 
-        const colorCore = new THREE.Color(0xffffee); // Blanco incandescente muy caliente
-        const colorHot = new THREE.Color(0xff6600); // Naranja plasma intenso
-        const colorCold = new THREE.Color(0x330000); // Rojo oscuro borde
+        // Bajamos masivamente la intensidad de los colores para evitar destellos del Post-Processing Bloom
+        const colorCore = new THREE.Color(0xaa99aa); // Antes 0xffffee
+        const colorHot = new THREE.Color(0x884400); // Antes 0xff6600
+        const colorCold = new THREE.Color(0x220000); // Antes 0x330000
 
         for (let j = 0; j < particleCount; j++) {
           // Distribución cuadrática: muchas más partículas cerca del borde del agujero
@@ -431,7 +432,9 @@ export default function PlanetScene({ activeIndex, onPlanetChange, planetsData }
            oortPos[j * 3 + 2] = r * Math.cos(phi);
         }
         oortGeom.setAttribute('position', new THREE.BufferAttribute(oortPos, 3));
-        const oortMat = new THREE.PointsMaterial({ color: 0x8d9cba, size: 2.0, transparent: true, opacity: 0.8 });
+        // Reducimos radicalmente el brillo, tamaño y opacidad para evitar que los puntos 
+        // pasen rozando la cámara y causen flashes masivos por el Bloom
+        const oortMat = new THREE.PointsMaterial({ color: 0x445566, size: 0.8, transparent: true, opacity: 0.3 });
         const oortMesh = new THREE.Points(oortGeom, oortMat);
         mesh.add(oortMesh);
         
@@ -443,7 +446,14 @@ export default function PlanetScene({ activeIndex, onPlanetChange, planetsData }
         mesh.material = new THREE.MeshBasicMaterial({ transparent: true, opacity: 0, depthWrite: false });
         
         const bodyGeom = new THREE.BoxGeometry(25, 25, 25);
-        const satMat = new THREE.MeshStandardMaterial({ color: 0xaaaaaa, metalness: 0.9, roughness: 0.4 });
+        // Reducimos enormemente el 'metalness' y subimos el 'roughness' para evitar que 
+        // actúe como un espejo y devuelva destellos deslumbrantes por el Bloom.
+        const satMat = new THREE.MeshStandardMaterial({ 
+          color: 0x888888, 
+          metalness: 0.1, 
+          roughness: 0.9,
+          emissive: 0x000000 
+        });
         const body = new THREE.Mesh(bodyGeom, satMat);
         
         const dishGeom = new THREE.ConeGeometry(35, 12, 32);
